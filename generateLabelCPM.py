@@ -362,8 +362,10 @@ def getImageandLabel(iterjson):
     meta = readmeta(iterjson)
     
     TransformMetaJoints(meta)
-
-    oriImg = cv.imread(meta['img_paths'])
+    path = str(meta['img_paths'])
+    path = path.replace("/data/guest_users/liangdong/liangdong/practice_demo/", "/data1/yks/dataset/openpose_dataset/dataset/")
+    oriImg = cv.imread(path)
+#     print(meta['img_paths'])
     maskmiss = getMask(meta)
     maskmiss = maskmiss.astype(np.uint8)
     

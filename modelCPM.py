@@ -290,10 +290,11 @@ def poseSymbol():
     return group
 
 class DataBatch(object):
-    def __init__(self, data, heatmaplabel, partaffinityglabel, heatweight, vecweight, pad=0):
+    def __init__(self, data, heatmaplabel, partaffinityglabel, heatweight, vecweight, index = 0,pad=0):
         self.data = [data]
         self.label = [heatmaplabel, partaffinityglabel, heatweight, vecweight]
         self.pad = pad
+        self.index = index
 
 
 class cocoIterweightBatch:
@@ -317,11 +318,14 @@ class cocoIterweightBatch:
         self.cur_batch = 0
 
         self.keys = data.keys()
+        self.index = 0
 
     def __iter__(self):
         return self
 
     def reset(self):
+        self.index = 0
+
         self.cur_batch = 0
 
     def __next__(self):
@@ -336,6 +340,7 @@ class cocoIterweightBatch:
         return self._provide_label
 
     def next(self):
+        self.index  += 1
         if self.cur_batch < self.num_batches:
             
             transposeImage_batch = []
@@ -346,7 +351,7 @@ class cocoIterweightBatch:
             
             for i in range(self._batch_size):
                 if self.cur_batch >= 45174:
-                    break
+                    raise StopIteration
                 image, mask, heatmap, pagmap = getImageandLabel(self.data[self.keys[self.cur_batch]])
                 maskscale = mask[0:368:8, 0:368:8, 0]
                
@@ -368,6 +373,8 @@ class cocoIterweightBatch:
                 mx.nd.array(heatmap_batch),
                 mx.nd.array(pagmap_batch),
                 mx.nd.array(heatweight_batch),
-                mx.nd.array(vecweight_batch))
+                mx.nd.array(vecweight_batch),
+                index = self.index
+                )
         else:
             raise StopIteration
