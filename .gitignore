@@ -20,3 +20,6 @@ vggposefinal-symbol\.json
 screenlog\.0
 
 cython/
+
+*.params
+

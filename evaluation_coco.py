@@ -24,6 +24,7 @@ from config.config import config
 
 from generateLabelCPM import *
 from modelCPM import *
+import modelCPM
 
 os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
 
@@ -106,7 +107,7 @@ def applyDNN(oriImg, images, sym1, arg_params1, aux_params1):
     # print testimage.shape
     # cmodel = mx.mod.Module(symbol=sym1, label_names=[])
     # cmodel = mx.mod.Module(symbol=sym1, label_names=[], context=mx.gpu(0))
-    cmodel = mx.mod.Module(symbol=sym1, context = mx.gpu(0), label_names=[])
+    cmodel = mx.mod.Module(symbol=sym1, context = mx.gpu(4), label_names=[])
     # cmodel = mx.mod.Module(symbol = sym1, label_names = []) 
     cmodel.bind(data_shapes=[('data', (1, 3, testimage.shape[1], testimage.shape[2]))])
     cmodel.init_params(arg_params=arg_params1, aux_params=aux_params1)
@@ -368,13 +369,15 @@ def connect56LineVec(oriImg, param, sym, arg_params, aux_params):
     return candidate, subset
 
 # Load parameters
-output_prefix = config.TEST.model_path 
-sym, _, _ = mx.model.load_checkpoint('../realtimePose', 0)
-sym1, arg_params, aux_params = mx.model.load_checkpoint(output_prefix, config.TEST.epoch)
-
+output_prefix = "/home/kohill/Desktop/mxnet_Realtime_Multi-Person_Pose_Estimation/model/vggposefinal"
+# sym, _, _ = mx.model.load_checkpoint('/home/kohill/Desktop/mxnet_Realtime_Multi-Person_Pose_Estimation/model/vggposefinal', 8)
+sym1, arg_params, aux_params = mx.model.load_checkpoint(output_prefix, 8)
+import modelCPM
+sym = modelCPM.CPMModel_test()
 
 # ground truth
-annFile = '/data/datasets/COCO/person_keypoints_trainval2014/person_keypoints_val2014.json'
+#annFile = '/data/datasets/COCO/person_keypoints_trainval2014/person_keypoints_val2014.json'
+annFile = "/data1/yks/dataset/openpose_dataset/dataset/annotations/person_keypoints_val2014.json"
 cocoGt = COCO(annFile)
 cats = cocoGt.loadCats(cocoGt.getCatIds())
 catIds = cocoGt.getCatIds(catNms=['person'])
@@ -434,8 +437,8 @@ notworkingimageIds = []
 for i in range(imgIds_num):
     print 'image: ', i
     img = cocoGt.loadImgs(imgIds[i])[0]
-    cimg = io.imread('/data/guest_users/liangdong/liangdong/practice_demo/val2014/'+img['file_name'])
-    
+    cimg = io.imread('/data1/yks/dataset/openpose_dataset/dataset/val2014/'+img['file_name'])
+    assert cimg is not None,"readin image failed."
     if len(cimg.shape)==2:       
         cimgRGB = np.zeros((cimg.shape[0], cimg.shape[1], 3))
         for i in range(3):

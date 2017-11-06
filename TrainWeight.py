@@ -3,7 +3,7 @@ from config.config import config
 
 class poseModule(mx.mod.Module):
 
-    def fit(self, train_data, num_epoch, batch_size, prefix, carg_params=None, begin_epoch=0):
+    def fit(self, train_data, num_epoch, batch_size, prefix, carg_params={}, caux_params = {},begin_epoch=0):
         
         assert num_epoch is not None, 'please specify number of epochs'
 
@@ -13,7 +13,7 @@ class poseModule(mx.mod.Module):
         ('heatweight', (batch_size, 19, 46, 46)),
         ('vecweight', (batch_size, 38, 46, 46))])
    
-        self.init_params(arg_params = carg_params, aux_params={},
+        self.init_params(arg_params = carg_params, aux_params=caux_params,
                          allow_missing=True)
         self.init_optimizer(optimizer='sgd', optimizer_params=(('learning_rate', 0.00004), ))    
         print (prefix)
@@ -46,13 +46,15 @@ class poseModule(mx.mod.Module):
         
         
 batch_size = 10
-cocodata = mx.io.PrefetchingIter(mx.io.PrefetchingIter(mx.io.PrefetchingIter( cocoIterweightBatch('pose_io/data.json',
+    
+cocodata = cocoIterweightBatch('pose_io/data.json',
                                'data', (batch_size, 3, 368,368),
                                ['heatmaplabel','partaffinityglabel','heatweight','vecweight'],
                                [(batch_size, 19, 46, 46), (batch_size, 38, 46, 46),
                                 (batch_size, 19, 46, 46), (batch_size, 38, 46, 46)],
                                batch_size
-                             ))))
+                             )
+# cocodata = mx.io.PrefetchingIter(cocodata)
 
 sym = poseSymbol()
 cmodel = poseModule(symbol=sym, context=[mx.gpu(1),mx.gpu(4)],
@@ -61,11 +63,12 @@ cmodel = poseModule(symbol=sym, context=[mx.gpu(1),mx.gpu(4)],
                                  'heatweight',
                                  'vecweight'])
 
-# testsym, newargs, aux_params = mx.model.load_checkpoint(config.TRAIN.initial_model, 0)
-
 prefix = 'model/vggpose'
+testsym, newargs, aux_params = mx.model.load_checkpoint("model/vggposefinal", 6)
+
+
 starttime = time.time()
-cmodel.fit(cocodata, num_epoch = config.TRAIN.num_epoch, batch_size = batch_size, prefix = prefix, carg_params = {})
+cmodel.fit(cocodata, num_epoch = config.TRAIN.num_epoch, batch_size = batch_size, prefix = prefix, carg_params = newargs,caux_params = aux_params)
 cmodel.save_checkpoint(prefix, config.TRAIN.num_epoch)
 endtime = time.time()
 

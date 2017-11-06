@@ -12,17 +12,17 @@ config.TEST.scale_search = [0.5, 1, 1.5, 2, 2.3]
 
 config.TEST.imgIds_num = -1
 
-config.TEST.model_path = 'testConfigModel'
+config.TEST.model_path = 'models/vggposefinal'
 
 #config.TEST.model_path = '../realtimePose'
 
-config.TEST.epoch = 0
+config.TEST.epoch = 6
 
-config.TEST.imgIds_num = 5
+config.TEST.imgIds_num = 50
 
 config.TRAIN = edict()
 
-config.TRAIN.num_epoch = 1
+config.TRAIN.num_epoch = 60000
 
 config.TRAIN.initial_model = '../realtimePose'
 
