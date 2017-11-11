@@ -369,9 +369,9 @@ def connect56LineVec(oriImg, param, sym, arg_params, aux_params):
     return candidate, subset
 
 # Load parameters
-output_prefix = "/home/kohill/Desktop/mxnet_Realtime_Multi-Person_Pose_Estimation/model/vggposefinal"
+output_prefix = "/home/kohill/Desktop/mxnet_Realtime_Multi-Person_Pose_Estimation/model/vggpose"
 # sym, _, _ = mx.model.load_checkpoint('/home/kohill/Desktop/mxnet_Realtime_Multi-Person_Pose_Estimation/model/vggposefinal', 8)
-sym1, arg_params, aux_params = mx.model.load_checkpoint(output_prefix, 8)
+sym1, arg_params, aux_params = mx.model.load_checkpoint(output_prefix, 3217)
 import modelCPM
 sym = modelCPM.CPMModel_test()
 

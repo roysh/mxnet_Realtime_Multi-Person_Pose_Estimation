@@ -142,7 +142,8 @@ class poseModule(mx.mod.Module):
                 print 'heat: ', cls_loss
                 '''   
                 if i%100==0:
-                    print i
+                    print i,"save checkpoint",epoch +i,prefix
+                    self.save_checkpoint(prefix, epoch +i)
                
                     
                 cmodel.backward()   
@@ -177,7 +178,7 @@ class poseModule(mx.mod.Module):
 
             arg_params, aux_params = self.get_params()
             self.set_params(arg_params, aux_params)
-            if epoch%1 == 0:
+            if epoch%100 == 0:
                 self.save_checkpoint(prefix, epoch +1)
             
             train_data.reset()
@@ -223,21 +224,21 @@ cocodata = cocoIterweightBatch('pose_io/data.json',
                              )
 
 sym = poseSymbol()
-cmodel = poseModule(symbol=sym, context=mx.cpu(),
+cmodel = poseModule(symbol=sym, context=mx.gpu(4),
                     label_names=['heatmaplabel',
                                  'partaffinityglabel',
                                  'heatweight',
                                  'vecweight'])
 ## Load parameters from vgg
-warmupModel = '/data/guest_users/liangdong/liangdong/practice_demo/mxnet_CPM/model/vgg19'
+warmupModel = '/data1/yks/models/vgg19/vgg19'
 testsym, arg_params, aux_params = mx.model.load_checkpoint(warmupModel, 0)
 newargs = {}
 for ikey in config.TRAIN.vggparams:
     newargs[ikey] = arg_params[ikey]
 
-prefix = 'vggpose'
+prefix = 'model/vggpose'
 starttime = time.time()
-cmodel.fit(cocodata, num_epoch = 3, batch_size = batch_size, prefix = prefix, carg_params = newargs)
+cmodel.fit(cocodata, num_epoch = 9999, batch_size = batch_size, prefix = prefix, carg_params = newargs)
 cmodel.save_checkpoint(prefix, config.TRAIN.num_epoch)
 endtime = time.time()
 
